@@ -3,7 +3,9 @@ const request = require('supertest');
 const server = require('./server.js');
 const db = require('../database/dbConfig');
 
+
 const Users = require('../auth/auth-model');
+const bcrypt = require('bcrypt');
 
 describe(server, function() {
     it('runs the tests', function() {
@@ -53,22 +55,40 @@ describe(server, function() {
     })
 
     describe('POST /login', function() {
-        it('should return 500 with no credentials', function() {
-            return request(server)
-            .post('/api/auth/login')
-            .then(res => {
-                expect(res.status).toBe(500);
-            })
-        })
 
-        it('should return a token', function() {
-            return request(server)
-            .post('/api/auth/login')
-            .then(res => {
-                expect(res.type).toMatch(/json/i)
+        it('should return 200 status', function () {
+
+        })
+        it('should return a token', async function() {
+            await db('users').insert([
+                {username: "test", password: bcrypt.hashSync("test", 8)}
+            ])
+            const res = await request(server).post('/api/auth/login')
+            .send({
+                username: 'test',
+                password: 'test'
             })
+            expect(res.status).toBe(200)
+            expect(res.body.token).toBeTruthy()
         })
     })
+
+    //     it('should return 200 status', function() {
+    //         return request(server)
+    //         .post('/api/auth/login')
+    //         .then(res => {
+    //             expect(res.status).toBe(500);
+    //         })
+    //     })
+
+    //     it('should return a token', function() {
+    //         return request(server)
+    //         .post('/api/auth/login')
+    //         .then(res => {
+    //             expect(res.type).toMatch(/json/i)
+    //         })
+    //     })
+    // })
 
 })
 
